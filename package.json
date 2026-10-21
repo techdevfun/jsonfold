@@ -19,7 +19,7 @@
   "license": "MIT",
   "name": "jsonfold",
   "scripts": {
-    "test": "node --test 'test/*.test.js'"
+    "test": "node --test test/alias.test.js test/cli.test.js test/fold.test.js test/stats.test.js test/unfold.test.js"
   },
   "version": "0.1.0"
 }
