@@ -1,0 +1,8 @@
+jsonfold receipt
+  original:  3,760 bytes
+  folded:    2,940 bytes
+  saved:     820 bytes (21.8%)
+  est. tokens saved: ~205 (~4 chars/token heuristic)
+  keys aliased: 27 (of 29 unique, 133 occurrences)
+  alias prefix: "$"
+  round-trip: OK (fold→unfold→deep-equal)
