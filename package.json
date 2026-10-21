@@ -1,0 +1,25 @@
+{
+  "author": "techdevfun",
+  "bin": {
+    "jsonfold": "./bin/jsonfold.js"
+  },
+  "dependencies": {},
+  "description": "Fold long JSON object keys into short aliases to save LLM prompt tokens \u2014 lossless, reversible, with a verifiable receipt.",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "json",
+    "cli",
+    "tokens",
+    "llm",
+    "compression",
+    "reversible"
+  ],
+  "license": "MIT",
+  "name": "jsonfold",
+  "scripts": {
+    "test": "node --test 'test/*.test.js'"
+  },
+  "version": "0.1.0"
+}
