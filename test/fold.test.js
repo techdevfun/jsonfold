@@ -35,6 +35,18 @@ test('values are never touched: numbers, strings, unicode, booleans, null', () =
   assert.ok(Object.is(restored.longkeyname, -0), '-0 must survive the round trip');
 });
 
+test('a "__proto__" key folds and unfolds as data, without polluting prototypes', () => {
+  const doc = JSON.parse('{"__proto__": {"polluted": false}, "repository_name": "x", "nested": {"__proto__": 1}}');
+  const { folded, map } = fold(doc);
+  const aliasToKey = new Map(Object.entries(map.aliases).map(([k, v]) => [v, k]));
+  const restored = unfoldValue(folded, aliasToKey);
+  assert.ok(deepEqual(restored, doc), 'round-trip must preserve the __proto__ key');
+  assert.equal(Object.getPrototypeOf(restored), Object.prototype);
+  assert.equal({}.polluted, undefined);
+  assert.ok(Object.prototype.hasOwnProperty.call(restored, '__proto__'), 'restored object must own the __proto__ key');
+  assert.deepEqual(restored['__proto__'], { polluted: false });
+});
+
 test('keys too short to benefit keep their original names', () => {
   const { folded } = fold({ id: 1, repository_name: 'x' });
   assert.ok('id' in folded, '"id" must not be renamed');
