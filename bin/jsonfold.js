@@ -176,6 +176,9 @@ function cmdFold(opts) {
 
   const outText = stringify(folded, opts.pretty);
   const originalBytes = Buffer.byteLength(input.text, 'utf8');
+  // Savings are always measured against the minified input, so
+  // pretty-printed whitespace is never credited to folding.
+  const minifiedBytes = Buffer.byteLength(JSON.stringify(parsed), 'utf8');
   const foldedBytes = Buffer.byteLength(outText, 'utf8');
 
   writeOutput(outText, opts.output);
@@ -187,7 +190,7 @@ function cmdFold(opts) {
     failRuntime(`cannot write map file ${mapPath}: ${err.message}`);
   }
 
-  const receipt = buildReceipt({ originalBytes, foldedBytes, map });
+  const receipt = buildReceipt({ originalBytes, minifiedBytes, foldedBytes, map });
   process.stderr.write(humanReceipt(receipt));
 
   if (opts.receipt) {
