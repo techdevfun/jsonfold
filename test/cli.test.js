@@ -80,6 +80,22 @@ test('default map path is ./fold.map.json when reading stdin without -o', () => 
   assert.ok(fs.existsSync(path.join(dir, 'fold.map.json')));
 });
 
+test('receipt measures savings against minified input, not raw whitespace', () => {
+  const dir = tmpdir();
+  const pretty = '{\n  "repositoryName": "demo",\n  "stargazersCount": 7\n}\n';
+  const r = run(['fold'], { input: pretty, cwd: dir });
+  assert.equal(r.status, 0);
+  const m = r.stderr.match(/saved:\s+([\d,]+) bytes/);
+  assert.ok(m, 'receipt must print a saved line');
+  const reported = Number(m[1].replace(/,/g, ''));
+  const minifiedBytes = Buffer.byteLength(JSON.stringify(JSON.parse(pretty)));
+  const honest = minifiedBytes - Buffer.byteLength(r.stdout);
+  assert.equal(
+    reported, honest,
+    'receipt must not credit pretty-printed whitespace to folding'
+  );
+});
+
 test('--receipt writes machine-readable receipt JSON', () => {
   const dir = tmpdir();
   const receiptPath = path.join(dir, 'receipt.json');
