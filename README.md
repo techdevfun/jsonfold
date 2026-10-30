@@ -29,7 +29,7 @@ deep-equal`) before writing anything, and prints a receipt to stderr:
 jsonfold receipt
   original:  3,760 bytes
   folded:    2,940 bytes
-  saved:     820 bytes (21.8%)
+  saved:     820 bytes (21.8% of minified input)
   est. tokens saved: ~205 (~4 chars/token heuristic)
   keys aliased: 27 (of 29 unique, 133 occurrences)
   alias prefix: "$"
@@ -38,7 +38,10 @@ jsonfold receipt
 
 Those are real numbers from the bundled demo (`examples/repo-list.json`,
 an invented 3.8 KB repo-list payload that ships minified, so the 21.8% is
-pure key-aliasing — no whitespace trickery).
+pure key-aliasing — no whitespace trickery). The receipt always measures
+savings against the minified input, so folding a pretty-printed file never
+credits its indentation to key-aliasing; `stats` projects from the same
+baseline, so the two always agree.
 
 ## Install
 
