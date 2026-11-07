@@ -156,6 +156,33 @@ test('end-to-end smoke: fold → unfold is byte-identical to minified original',
   assert.equal(fs.readFileSync(path.join(dir, 'restored.json'), 'utf8'), original);
 });
 
+test('--pretty receipt measures savings against minified folded output', () => {
+  // The receipt compares like with like: folding the bundled demo with
+  // --pretty must report the same savings as the minified fold, and agree
+  // with what `stats` projects — pretty-printing indentation is not
+  // charged against the aliasing savings.
+  const dir = tmpdir();
+  const demo = path.join(__dirname, '..', 'examples', 'repo-list.json');
+  const savedOf = (stderr) => {
+    const m = stderr.match(/saved:\s+([\d,]+) bytes/);
+    assert.ok(m, 'receipt must print a saved line');
+    return Number(m[1].replace(/,/g, ''));
+  };
+  const plain = run(['fold', demo, '-o', path.join(dir, 'plain.json')], { cwd: dir });
+  assert.equal(plain.status, 0);
+  const pretty = run(['fold', demo, '--pretty', '-o', path.join(dir, 'pretty.json')], { cwd: dir });
+  assert.equal(pretty.status, 0);
+  assert.equal(
+    savedOf(pretty.stderr), savedOf(plain.stderr),
+    'receipt savings must not depend on --pretty'
+  );
+  assert.equal(savedOf(pretty.stderr), 820, 'demo saves 820 bytes by key aliasing');
+  assert.match(pretty.stderr, /folded:\s+2,940 bytes/);
+  assert.match(pretty.stderr, /written:\s+4,412 bytes \(pretty-printed output\)/);
+  const stats = run(['stats', demo], { cwd: dir });
+  assert.match(stats.stdout, /saves 820 bytes \(21\.8% of minified\)/);
+});
+
 test('--pretty indents the folded output', () => {
   const r = run(['fold', '--pretty'], { input: '{"repository_name":"x"}' });
   assert.equal(r.status, 0);
