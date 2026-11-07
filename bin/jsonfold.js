@@ -179,7 +179,15 @@ function cmdFold(opts) {
   // Savings are always measured against the minified input, so
   // pretty-printed whitespace is never credited to folding.
   const minifiedBytes = Buffer.byteLength(JSON.stringify(parsed), 'utf8');
-  const foldedBytes = Buffer.byteLength(outText, 'utf8');
+  const writtenBytes = Buffer.byteLength(outText, 'utf8');
+  // The receipt compares like with like: the folded size it reports is
+  // the MINIFIED folded size, so --pretty indentation is never charged
+  // against the aliasing savings — the same rule as the input side.
+  // (Before this fix the receipt measured the pretty-printed output
+  // against the minified input and reported 0 bytes saved for a fold
+  // that aliased 27 keys.) The actual bytes written are reported
+  // separately when they differ.
+  const foldedBytes = Buffer.byteLength(JSON.stringify(folded), 'utf8');
 
   writeOutput(outText, opts.output);
 
@@ -190,7 +198,13 @@ function cmdFold(opts) {
     failRuntime(`cannot write map file ${mapPath}: ${err.message}`);
   }
 
-  const receipt = buildReceipt({ originalBytes, minifiedBytes, foldedBytes, map });
+  const receipt = buildReceipt({
+    originalBytes,
+    minifiedBytes,
+    foldedBytes,
+    writtenBytes: writtenBytes === foldedBytes ? undefined : writtenBytes,
+    map,
+  });
   process.stderr.write(humanReceipt(receipt));
 
   if (opts.receipt) {
