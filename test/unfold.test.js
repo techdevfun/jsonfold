@@ -37,3 +37,15 @@ test('mapFromObject rejects anything that is not a jsonfold map', () => {
     /invalid alias/
   );
 });
+
+test('mapFromObject rejects a map with two keys sharing one alias', () => {
+  // Without this check unfold silently restores the last key and drops
+  // the other one — a hand-edited or corrupt map would lose data.
+  assert.throws(
+    () => mapFromObject({
+      jsonfold: 1,
+      aliases: { aaaaaaaaaaaaaaaaa: '$0', bbbbbbbbbbbbbbbb: '$0' },
+    }),
+    /duplicate alias "\$0"/
+  );
+});
